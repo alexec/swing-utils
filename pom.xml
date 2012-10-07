@@ -8,6 +8,19 @@
     <artifactId>swing-utils</artifactId>
     <version>1.0</version>
 
+    <name>Swing Utils</name>
+
+    <description>Some basic Swing components such as a wizard, a form layout and a progress widget.</description>
+
+    <organization>
+        <url>http://www.alexecollins.com/</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <comments>No licensing or anything like.</comments>
+        </license>
+    </licenses>
 
     <build>
         <plugins>

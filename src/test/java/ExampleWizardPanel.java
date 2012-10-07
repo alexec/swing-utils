@@ -17,7 +17,7 @@ public class ExampleWizardPanel extends WizardPanel {
 	private final ProgressPanel page3 = new ProgressPanel("Long running task.", "Explanatory text about why I need to complete some long running task now.");
 
 	public ExampleWizardPanel() {
-		super("Example Panel", createIcon());
+		super("Example Wizard Panel", createIcon());
 		// initial details
 		{
 			final JPanel p = new JPanel(new BorderLayout(0, 20));
