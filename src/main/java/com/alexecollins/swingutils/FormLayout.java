@@ -26,7 +26,7 @@ public class FormLayout implements LayoutManager2 {
 	private final GridBagConstraints c = new GridBagConstraints();
 
 	public FormLayout() {
-		c.insets = new Insets(0, 10, 0, 0);
+		c.insets = new Insets(0, 5, 0, 5);
 	}
 
 	public void setInsets(Insets insets) {
