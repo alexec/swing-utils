@@ -12,15 +12,15 @@ import java.awt.event.ActionListener;
  * <p/>
  * Creates a simple, multi-page wizard.
  * <pre>
- * +------------------------------+
- * |Title                     Icon|
- * +------------------------------+
- * |                              |
- * |              Page            |
- * |                              |
- * +------------------------------+
- * |   Previous Next Finish Cancel|
- * +------------------------------+
+ * +--------------------------------------+
+ * |Title                             Icon|
+ * +--------------------------------------+
+ * |                                      |
+ * |                  Page                |
+ * |                                      |
+ * +--------------------------------------+
+ * |   Previous Next  Finish  Cancel  Help|
+ * +--------------------------------------+
  * </pre>
  * <p/>
  * Known issues:
@@ -33,7 +33,7 @@ import java.awt.event.ActionListener;
  *
  * @author alexec (alex.e.c@gmail.com)
  */
-public class WizardPanel extends JPanel {
+public abstract class WizardPanel extends JPanel {
 
 	/**
 	 * Used to layout the pages.
@@ -46,6 +46,8 @@ public class WizardPanel extends JPanel {
 	private final JButton next = new JButton("Next >");
 	private final JButton prev = new JButton("< Back");
 	private final JButton finish = new JButton("Finish");
+	private final JButton cancel = new JButton("Cancel");
+	private final JButton help = new JButton("Help");
 
 
 	/**
@@ -119,18 +121,37 @@ public class WizardPanel extends JPanel {
 
 			p.add(finish);
 			p.add(Box.createRigidArea(new Dimension(pad, pad)));
-			JButton cancel = new JButton(new AbstractAction("Cancel") {
+			cancel.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent actionEvent) {
 					cancel();
 				}
-			}) {{
-				setMnemonic('c');
-			}};
+			});
+			cancel.setMnemonic('c');
 			p.add(cancel);
+			p.add(Box.createRigidArea(new Dimension(pad, pad))) ;
+			help.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent actionEvent) {
+					help();
+				}
+			});
+			p.add(help);
+			help.setMnemonic('h');
 			super.add(p, BorderLayout.SOUTH);
 		}
 	}
+
+	/**
+	 * Display any help.
+	 *
+	 * By default we assume you'll be providing help. No help?
+	 *
+	 * <code>
+	 *     getHelp().setEnabled(false);
+	 * </code>
+	 */
+	protected abstract void help();
 
 	/**
 	 * @param page The new page to add.
@@ -172,6 +193,10 @@ public class WizardPanel extends JPanel {
 
 	/**
 	 * Cancel the wizard.
+	 *
+	 * This hides the wizard by default, override to change this to something else (i.e. cancel the current task).
+	 *
+	 * Use the fact that the component is hidden to dispose of any containing frame if you need to.
 	 */
 	protected void cancel() {
 		setVisible(false);
@@ -188,6 +213,7 @@ public class WizardPanel extends JPanel {
 		prev.setEnabled(!pages.getComponent(0).isVisible());
 		next.setEnabled(!pages.getComponent(pages.getComponentCount() - 1).isVisible());
 		finish.setEnabled(!next.isEnabled());
+		cancel.setEnabled(!finish.isEnabled());
 	}
 
 	public JButton getPrevious() {
@@ -196,5 +222,9 @@ public class WizardPanel extends JPanel {
 
 	public JButton getNext() {
 		return next;
+	}
+
+	public JButton getHelp() {
+		return help;
 	}
 }

@@ -15,6 +15,8 @@ public class ExampleWizardPanel extends WizardPanel {
 
 	private final ProgressPanel page1 = new ProgressPanel("Long running task.", "Explanatory text about why I need to complete some long running task now.");
 	private final ProgressPanel page3 = new ProgressPanel("Long running task.", "Explanatory text about why I need to complete some long running task now.");
+	private SwingWorker<Void, Void> page1Worker;
+	private SwingWorker<Void, Void> page3Worker;
 
 	public ExampleWizardPanel() {
 		super("Example Wizard Panel", createIcon());
@@ -79,37 +81,48 @@ public class ExampleWizardPanel extends WizardPanel {
 	}
 
 	@Override
+	protected void help() {
+		JOptionPane.showConfirmDialog(this, "Help goes here");
+	}
+
+	@Override
 	protected void next() {
 		super.next();
 
 		if (get() == page1) {
 			getPrevious().setEnabled(false);
 			getNext().setEnabled(false);
-			new SwingWorker<Void, Void>() {
+			page1Worker = new SwingWorker<Void, Void>() {
 				@Override
 				protected Void doInBackground() throws Exception {
-					Thread.sleep(1000);
+					for (int i = 0; !isCancelled() && i < 5000; i+=50) {
+						Thread.sleep(50);
+					}
 					return null;
 				}
 
 				@Override
 				protected void done() {
-					next();
+					if (!isCancelled()) {
+						next();
+					} else {
+						previous();
+					}
 				}
-			}.execute();
+			};
+			page1Worker.execute();
 		} else if (get() == page3) {
 			getPrevious().setEnabled(false);
 			getNext().setEnabled(false);
-			page3.setProgress(0);
-			final SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+			page3Worker = new SwingWorker<Void, Void>() {
 				private String note;
 
 				@Override
 				protected Void doInBackground() throws Exception {
-					for (int i = 0; i < 100; i++) {
+					for (int i = 0; !isCancelled() && i < 30000; i+=30) {
+						setProgress(i*100/30000);
 						Thread.sleep(30);
-						setProgress(i + 1);
-						setNote("Done " + i / 20 + "/5");
+						setNote("Done " + i * 5 / 30000 + "/5");
 
 					}
 					return null;
@@ -117,14 +130,18 @@ public class ExampleWizardPanel extends WizardPanel {
 
 				@Override
 				protected void done() {
-					next();
+					if (!isCancelled()) {
+						next();
+					} else {
+						previous();
+					}
 				}
 
 				public void setNote(String note) {
 					firePropertyChange("note", this.note, this.note = note);
 				}
 			};
-			worker.addPropertyChangeListener(
+			page3Worker.addPropertyChangeListener(
 					new PropertyChangeListener() {
 						public void propertyChange(PropertyChangeEvent evt) {
 							if ("progress".equals(evt.getPropertyName())) {
@@ -134,7 +151,7 @@ public class ExampleWizardPanel extends WizardPanel {
 							}
 						}
 					});
-			worker.execute();
+			page3Worker.execute();
 		}
 	}
 
@@ -149,6 +166,14 @@ public class ExampleWizardPanel extends WizardPanel {
 
 	@Override
 	protected void cancel() {
+		if (get() == page1 && !page1Worker.isDone()) {
+			page1Worker.cancel(false);
+			return;
+		}
+		if (get() == page3 && !page3Worker.isDone()) {
+			page3Worker.cancel(false);
+			return;
+		}
 		System.exit(0);
 	}
 
@@ -167,6 +192,8 @@ public class ExampleWizardPanel extends WizardPanel {
 		f.add(new ExampleWizardPanel());
 		f.setVisible(true);
 	}
+
+
 
 
 }
